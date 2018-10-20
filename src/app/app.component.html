@@ -1,20 +1,60 @@
-<!--The content below is only a placeholder and can be replaced.-->
-<div style="text-align:center">
-  <h1>
-    Welcome to {{ title }}!
-  </h1>
-  <img width="300" alt="Angular Logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNTAgMjUwIj4KICAgIDxwYXRoIGZpbGw9IiNERDAwMzEiIGQ9Ik0xMjUgMzBMMzEuOSA2My4ybDE0LjIgMTIzLjFMMTI1IDIzMGw3OC45LTQzLjcgMTQuMi0xMjMuMXoiIC8+CiAgICA8cGF0aCBmaWxsPSIjQzMwMDJGIiBkPSJNMTI1IDMwdjIyLjItLjFWMjMwbDc4LjktNDMuNyAxNC4yLTEyMy4xTDEyNSAzMHoiIC8+CiAgICA8cGF0aCAgZmlsbD0iI0ZGRkZGRiIgZD0iTTEyNSA1Mi4xTDY2LjggMTgyLjZoMjEuN2wxMS43LTI5LjJoNDkuNGwxMS43IDI5LjJIMTgzTDEyNSA1Mi4xem0xNyA4My4zaC0zNGwxNy00MC45IDE3IDQwLjl6IiAvPgogIDwvc3ZnPg==">
+<div class="container" (paste)="processClipboard($event.clipboardData.getData('text/plain'))">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3>Track</h3>
+        </div>
+        <div class="col-12">
+            <input type="text" class="mr-1" name="tourDate" id="tourDate" [value]="start | date:'yyyy-MM-dd'" size="10">
+            <input type="text" class="mr-1" name="tourStart" id="tourStart" [value]="start | date:'HH:mm:ss'" size="6">
+            <span class="mr-1">-</span>
+            <input type="text" class="mr-2" name="tourStop" id="tourStop" [value]="stop | date:'HH:mm:ss'" size="6">
+            <span class="mr-2">=</span>
+            <input type="text" class="mr-1" name="tourStop" id="tourStop" [value]="duration" size="6" readonly>
+        </div>
+    </div>
+    <div class="d-flex">
+        <div class="flex-grow-1">
+            <h3>Flying Tour</h3>
+        </div>
+        <div>
+            <button type="button" class="btn btn-info mr-1" (click)="clear()">Clear</button>
+            <button type="button" class="btn btn-info" (click)="exportTour()">Export Tour</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <!-- <div *ngFor="let item of items">
+                <app-fly-to [data]="item"></app-fly-to>
+            </div> -->
+            <table style="width: 100%">
+                <tr>
+                    <th></th>
+                    <th>Id</th>
+                    <th>LookAt</th>
+                    <th>FlyMode</th>
+                    <th>TimeStamp</th>
+                    <th>Speed</th>
+                    <th>Duration</th>
+                    <th>Wait time</th>
+                </tr>
+                <tr *ngFor="let item of items; let i = index">
+                    <td>{{i+1}}</td>
+                    <td><span>{{item.id}}</span></td>
+                    <td><span class="border border-info rounded" style="font-size: .6rem">...</span></td>
+                    <td><button type="button" class="btn btn-outline-info btn-sm" style="width: 66px"
+                            (click)="item.smooth = !item.smooth">{{item.smooth ? 'Smooth' : 'Bounce'}}</button></td>
+                    <td><input #tsInput class="form-control form-control-sm" type="text" [value]="item.when | date:'HH:mm:ss'"
+                            (input)="setTimestamp(tsInput.value, item)"></td>
+                    <td><input *ngIf="i > 0" #speedInput class="form-control form-control-sm " type="number"
+                            [value]="item.speed" (input)="calcDuration(speedInput.value, item)" size="2"></td>
+                    <td><input *ngIf="i > 0" #durInput class="form-control form-control-sm" type="number" [value]="item.dur"
+                            (input)="calcSpeed(durInput.value, item)" size="2"></td>
+                    <td><input #waitInput class="form-control form-control-sm " type="number"
+                        [(ngModel)]="item.waitTime" size="2"></td>
+                </tr>
+            </table>
+        </div>
+    </div>
 </div>
-<h2>Here are some links to help you start: </h2>
-<ul>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://angular.io/tutorial">Tour of Heroes</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://github.com/angular/angular-cli/wiki">CLI Documentation</a></h2>
-  </li>
-  <li>
-    <h2><a target="_blank" rel="noopener" href="https://blog.angular.io/">Angular blog</a></h2>
-  </li>
-</ul>
-
+<!-- https://medium.com/@tkssharma/understanding-viewchildren-viewchild-contentchildren-and-contentchild-b16c9e0358e -->
+<!-- https://codecraft.tv/courses/angular/custom-directives/hostlistener-and-hostbinding/ -->
