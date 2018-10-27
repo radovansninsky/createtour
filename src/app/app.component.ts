@@ -2,10 +2,10 @@ import { Component, OnInit } from '@angular/core';
 
 import * as xmljs from 'xml-js';
 import * as xmlbuilder from 'xmlbuilder';
+import * as FileSaver from 'file-saver';
 
 import { TourItem } from './model/tour-item';
 import { isNullOrUndefined } from 'util';
-import { renderTemplate } from '@angular/core/src/render3/instructions';
 
 @Component({
   selector: 'app-root',
@@ -14,8 +14,10 @@ import { renderTemplate } from '@angular/core/src/render3/instructions';
 })
 export class AppComponent implements OnInit {
 
+  name: string;
   start: Date = new Date();
   stop: Date = new Date();
+  speed = 1.0;
   items: TourItem[] = [];
 
   get duration(): string {
@@ -36,8 +38,8 @@ export class AppComponent implements OnInit {
     // console.log('New clipboard text:', t);
     const obj = xmljs.xml2js(t, {compact: true});
     // console.log('Converted into object:', obj);
+    this.name = this.findName(obj);
     const placemark = this.findPlacemark(obj);
-    // placemark && console.log('Found placemark:', placemark);
 
     this.stop.setTime(0);
     let lastTs: Date;
@@ -51,6 +53,10 @@ export class AppComponent implements OnInit {
         i.when = new Date(this.start.getTime());
       }
     });
+  }
+
+  private findName(o: any): string {
+    return o.kml && o.kml.Document && o.kml.Document.Folder && o.kml.Document.Folder.name && o.kml.Document.Folder.name._text;
   }
 
   findPlacemark(o: Object): Array<any> {
@@ -140,8 +146,9 @@ export class AppComponent implements OnInit {
       .up(); // Tour
 
     // https://jsfiddle.net/UselessCode/qm5AG/
-    // https://www.npmjs.com/package/file-saver
-    console.log(root.end({pretty: true}));
+    // console.log(root.end({pretty: true}));
+    const blob = new Blob([root.end({ pretty: true })], { type: 'text/plain;charset=utf-8' });
+    FileSaver.saveAs(blob, 'export.kml');
   }
 
   buildTourItem(root, i: TourItem) {

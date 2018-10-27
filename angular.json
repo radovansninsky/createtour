@@ -28,7 +28,8 @@
             ],
             "scripts": [
               "node_modules/xml-js/dist/xml-js.js",
-              "node_modules/xmlbuilder/lib/index.js"
+              "node_modules/xmlbuilder/lib/index.js",
+              "node_modules/file-saver/dist/FileSaver.js"
             ]
           },
           "configurations": {
