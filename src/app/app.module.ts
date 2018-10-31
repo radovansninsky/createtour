@@ -3,6 +3,7 @@ import { NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 import { AppComponent } from './app.component';
+import { KmlService } from './kml.service';
 
 @NgModule({
   declarations: [
@@ -11,7 +12,7 @@ import { AppComponent } from './app.component';
   imports: [
     BrowserModule, FormsModule
   ],
-  providers: [],
+  providers: [KmlService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
