@@ -1,18 +1,5 @@
 <div class="container" (paste)="processClipboard($event.clipboardData.getData('text/plain'))">
-    <div class="row mb-4">
-        <div class="col-12">
-            <h3>Track</h3>
-        </div>
-        <div class="col-12">
-            <input type="text" class="mr-1" name="tourDate" id="tourDate" [value]="start | date:'yyyy-MM-dd'" size="10">
-            <input type="text" class="mr-1" name="tourStart" id="tourStart" [value]="start | date:'HH:mm:ss'" size="6">
-            <span class="mr-1">-</span>
-            <input type="text" class="mr-2" name="tourStop" id="tourStop" [value]="stop | date:'HH:mm:ss'" size="6">
-            <span class="mr-2">=</span>
-            <input type="text" class="mr-1" name="tourStop" id="tourStop" [value]="duration" size="6" readonly>
-        </div>
-    </div>
-    <div class="d-flex mb-1">
+    <div class="d-flex mt-1 mb-1">
         <div class="flex-grow-1">
             <h3>Flying Tour</h3>
         </div>
@@ -21,13 +8,27 @@
             <button type="button" class="btn btn-info" (click)="exportTour()">Export Tour</button>
         </div>
     </div>
+    <div class="row mb-1">
+        <div class="col-12">
+            <input type="text" class="mr-1" [value]="start | date:'yyyy-MM-dd'" size="10">
+            <input type="text" [value]="start | date:'HH:mm:ss'" size="6">
+            <span class="ml-1 mr-1">-</span>
+            <input type="text" [value]="stop | date:'HH:mm:ss'" size="6">
+            <span class="ml-2 mr-2">=</span>
+            <input type="text" [value]="duration" size="6" readonly>
+            <span class="ml-1 mr-1">/</span>
+            <input type="number" name="tourSpeed" [(ngModel)]="speed" (input)="recalculate()">
+            <span class="ml-2 mr-2">=></span>
+            <input type="text" [value]="flyDuration" size="6" readonly>
+        </div>
+    </div>
     <div class="row mb-2">
         <div class="col-2">
             <input class="form-control form-control-sm" type="text" name="tourName" [(ngModel)]="name">
         </div>
-        <div class="col-1">
-            <input class="form-control form-control-sm" type="number" name="tourSpeed" [(ngModel)]="speed">
-        </div>
+        <!-- <div class="col-1">
+            <input class="form-control form-control-sm" type="number" name="tourSpeed" >
+        </div> -->
     </div>
     <div class="row">
         <div class="col-12">
@@ -35,30 +36,31 @@
                 <app-fly-to [data]="item"></app-fly-to>
             </div> -->
             <table style="width: 100%">
-                <tr>
+                <!-- <tr>
                     <th></th>
-                    <th>Id</th>
+                    <th>Name</th>
                     <th>LookAt</th>
                     <th>FlyMode</th>
                     <th>TimeStamp</th>
                     <th>Speed</th>
                     <th>Duration</th>
                     <th>Wait time</th>
-                </tr>
+                </tr> -->
                 <tr *ngFor="let item of items; let i = index">
-                    <td>{{i+1}}</td>
-                    <td><input #name class="form-control form-control-sm" type="text" [(value)]="item.id"></td>
-                    <td><span class="border border-info rounded" style="font-size: .6rem">...</span></td>
+                    <!-- <td>{{i+1}}</td> -->
+                    <td><i class="fas fa-map-marker-alt"></i></td>
+                    <td><input #name class="form-control form-control-sm" type="text" [(value)]="item.name"></td>
                     <td><button type="button" class="btn btn-outline-info btn-sm" style="width: 66px" (click)="item.smooth = !item.smooth">{{item.smooth
                             ? 'Smooth' : 'Bounce'}}</button></td>
                     <td><input #tsInput class="form-control form-control-sm" type="text" [value]="item.when | date:'HH:mm:ss'"
                             (input)="setTimestamp(tsInput.value, item)"></td>
-                    <td><input *ngIf="i > 0" #speedInput class="form-control form-control-sm " type="number" [value]="item.speed"
-                            (input)="calcDuration(speedInput.value, item)" size="2"></td>
+                    <!-- <td><input *ngIf="i > 0" #speedInput class="form-control form-control-sm " type="number" [value]="item.speed"
+                            (input)="calcDuration(speedInput.value, item)" size="2"></td> -->
                     <td><input *ngIf="i > 0" #durInput class="form-control form-control-sm" type="number" [value]="item.dur"
                             (input)="calcSpeed(durInput.value, item)" size="2"></td>
                     <td><input #waitInput class="form-control form-control-sm " type="number" [(ngModel)]="item.waitTime"
                             size="2"></td>
+                    <td><i class="fas fa-times-circle"></i></td>
                 </tr>
             </table>
         </div>

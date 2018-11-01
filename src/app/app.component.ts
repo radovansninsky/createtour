@@ -1,7 +1,5 @@
 import { Component, OnInit } from '@angular/core';
 
-import * as xmljs from 'xml-js';
-
 import { TourItem } from './model/tour-item';
 import { KmlParser } from './kml-parser';
 import { KmlService } from './kml.service';
@@ -32,6 +30,12 @@ export class AppComponent implements OnInit {
     this.stop.setTime(this.start.getTime() + d);
   }
 
+  get flyDuration(): string {
+    const d = new Date((this.stop.getTime() - this.start.getTime()) / this.speed);
+    return `${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}:` +
+      `${String(d.getUTCSeconds()).padStart(2, '0')}`;
+  }
+
   ngOnInit() {
   }
 
@@ -41,15 +45,42 @@ export class AppComponent implements OnInit {
       const k = new KmlParser();
       k.parse(t);
       console.log(k.items);
+
       // todo zistit ci pridat alebo replacovat
       this.clear();
       this.name = k.name;
       this.items.push(...k.items);
       this.start = k.start;
-      this.stop = k.stop;
+
+      this.stop = new Date(0);
+      let lastTime = this.start;
+      this.items.forEach(ti => {
+        if (ti.when == null) {
+          ti.when = new Date(lastTime.getTime());
+        }
+        lastTime = ti.when;
+
+        if (ti.when > this.stop) {
+          this.stop.setTime(ti.when.getTime());
+        }
+      });
+
+      this.recalculate();
+
     } catch (error) {
       console.error('Error occured while parsing clipboard text (probably not xml), detail:', error.message);
     }
+  }
+
+  recalculate() {
+    if (this.items.length === 0) {
+      return;
+    }
+    let lastTime = this.items[0].when;
+    this.items.forEach(ti => {
+      ti.recalculate(lastTime, this.speed);
+      lastTime = ti.when;
+    });
   }
 
   exportTour() {
@@ -60,6 +91,8 @@ export class AppComponent implements OnInit {
     this.items.length = 0;
     this.start = new Date();
     this.stop = new Date();
+    this.name = '';
+    this.speed = 1.0;
   }
 
   setTimestamp(newTs: string, item: TourItem) {
@@ -71,7 +104,7 @@ export class AppComponent implements OnInit {
       if (i === 0) {
         item.when.setTime(d);
         if (d < this.start.getTime()) {
-          this.start = new Date(d);
+        this.start = new Date(d);
         }
       } else if (d > prevWhen.getTime()) {
         item.when.setTime(d);
@@ -79,13 +112,8 @@ export class AppComponent implements OnInit {
         item.when.setTime(prevWhen.getTime());
       }
 
-      item.recalculate(prevWhen);
+      this.recalculate();
     }
-  }
-
-  calcDuration(newSpeed: number, item: TourItem) {
-    item.speed = newSpeed;
-    // item.dur = item.lastItemDur / item.speed;
   }
 
   calcSpeed(newDur: number, item: TourItem) {

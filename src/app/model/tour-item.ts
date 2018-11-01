@@ -5,7 +5,8 @@ export class TourItem {
     private _dur: number;
 
     constructor(
-        public id: string,
+        public name: string,
+        dur: number = 0.0,
         public lon: string = '',
         public lat: string = '',
         public alt: string = '',
@@ -14,11 +15,8 @@ export class TourItem {
         public range: string = '',
         public smooth: boolean = false,
         public when: Date = null,
-        speed: number = 1.0,
-        dur: number = 0.0,
         public waitTime: number = 0
     ) {
-        this._speed = speed;
         this._dur = dur;
     }
 
@@ -51,8 +49,8 @@ export class TourItem {
         this._dur = val;
     }
 
-    recalculate(prevWhen: Date) {
+    recalculate(prevWhen: Date, speed: number) {
         const dur = (this.when.getTime() - prevWhen.getTime()) / 1000;
-        this._dur = dur / this._speed;
+        this._dur = dur / speed;
     }
 }
