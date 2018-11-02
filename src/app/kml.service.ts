@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import * as xmlbuilder from 'xmlbuilder';
 import * as FileSaver from 'file-saver';
 
-import { TourItem } from './model/tour-item';
+import { TourItem } from './tour-item';
 
 @Injectable({
   providedIn: 'root'

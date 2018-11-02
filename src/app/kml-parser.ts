@@ -3,7 +3,7 @@ import { isNullOrUndefined } from 'util';
 import * as xmljs from 'xml-js';
 import { Type, plainToClass } from 'class-transformer';
 
-import { TourItem } from './model/tour-item';
+import { TourItem } from './tour-item';
 
 class XmlEl {
     type: string;
@@ -61,7 +61,7 @@ export class KmlParser {
 
     parse(text: string) {
         const obj = plainToClass(XmlEl, xmljs.xml2js(text, { compact: false }));
-        console.log('Parsed object:', obj);
+        // console.log('Parsed object:', obj);
 
         const kmlnode = obj.find('kml');
         if (kmlnode.is('kml')) {
@@ -112,6 +112,9 @@ export class KmlParser {
                     }
                 });
 
+            }
+            if (this.items[0] && this.items[0].when == null) {
+                this.items[0].when = this.start;
             }
         }
     }

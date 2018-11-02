@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 
-import { TourItem } from './model/tour-item';
+import { TourItem } from './tour-item';
 import { KmlParser } from './kml-parser';
 import { KmlService } from './kml.service';
 
@@ -12,12 +12,18 @@ import { KmlService } from './kml.service';
 export class AppComponent implements OnInit {
 
   name: string;
-  start: Date = new Date();
-  stop: Date = new Date();
   speed = 1.0;
   items: TourItem[] = [];
 
   constructor(private kmlService: KmlService) {}
+
+  get start(): Date {
+    return this.items.length > 0 ? this.items[0].when  : new Date();
+  }
+
+  get stop(): Date {
+    return this.items.length > 0 ? this.items[this.items.length - 1].when  : new Date();
+  }
 
   get duration(): string {
     const d = new Date(this.stop.getTime() - this.start.getTime());
@@ -48,39 +54,42 @@ export class AppComponent implements OnInit {
 
       // todo zistit ci pridat alebo replacovat
       this.clear();
-      this.name = k.name;
-      this.items.push(...k.items);
-      this.start = k.start;
+      if (k.items.length > 0) {
+        this.name = k.name;
+        this.items.push(...k.items);
 
-      this.stop = new Date(0);
-      let lastTime = this.start;
-      this.items.forEach(ti => {
-        if (ti.when == null) {
-          ti.when = new Date(lastTime.getTime());
+        let lastTime = this.items[0].when;
+        const speeds = [];
+        this.items.forEach(ti => {
+          ti.when = ti.when == null ? new Date(lastTime.getTime()) : ti.when;
+          ti.dur = ti.dur === 0 ? ((ti.when.getTime() - lastTime.getTime()) / 1000) / this.speed : ti.dur;
+          if (ti.dur > 0 && ti.dur !== NaN) {
+            speeds.push(((ti.when.getTime() - lastTime.getTime()) / 1000) / ti.dur);
+          }
+          lastTime = ti.when;
+        });
+        if (speeds.length > 0) {
+          this.speed = Math.round(Math.round(speeds.reduce((sum, v) => sum + v)) / speeds.length * 10) / 10;
         }
-        lastTime = ti.when;
-
-        if (ti.when > this.stop) {
-          this.stop.setTime(ti.when.getTime());
-        }
-      });
-
-      this.recalculate();
-
+      }
     } catch (error) {
       console.error('Error occured while parsing clipboard text (probably not xml), detail:', error.message);
     }
   }
 
   recalculate() {
-    if (this.items.length === 0) {
-      return;
-    }
-    let lastTime = this.items[0].when;
+    let lastTime = this.start;
+    const speeds = [];
     this.items.forEach(ti => {
-      ti.recalculate(lastTime, this.speed);
+      ti.dur = ((ti.when.getTime() - lastTime.getTime()) / 1000) / this.speed;
+      if (ti.dur > 0 && ti.dur !== NaN) {
+        speeds.push(((ti.when.getTime() - lastTime.getTime()) / 1000) / ti.dur);
+      }
       lastTime = ti.when;
     });
+    if (speeds.length > 0) {
+      this.speed = Math.round(Math.round(speeds.reduce((sum, v) => sum + v)) / speeds.length * 10) / 10;
+    }
   }
 
   exportTour() {
@@ -89,30 +98,24 @@ export class AppComponent implements OnInit {
 
   clear() {
     this.items.length = 0;
-    this.start = new Date();
-    this.stop = new Date();
     this.name = '';
     this.speed = 1.0;
   }
 
   setTimestamp(newTs: string, item: TourItem) {
-    const d = Date.parse(this.start.toISOString().slice(0, 11) + newTs);
+    const s = this.start.toISOString().slice(0, 11) + newTs;
     const i = this.items.indexOf(item);
-    const prevWhen = i > 0 ? this.items[i - 1].when : this.start;
+    const d = Date.parse(s);
 
-    if (d !== NaN) {
-      if (i === 0) {
-        item.when.setTime(d);
-        if (d < this.start.getTime()) {
-        this.start = new Date(d);
+    if (!isNaN(d)) {
+      if (i > 0) {
+        if (d > this.items[i - 1].when.getTime()) {
+          item.when = new Date(d);
         }
-      } else if (d > prevWhen.getTime()) {
-        item.when.setTime(d);
       } else {
-        item.when.setTime(prevWhen.getTime());
+        item.when = new Date(d);
       }
-
-      this.recalculate();
+      // todo call recalculate
     }
   }
 
