@@ -88,6 +88,8 @@ export class KmlParser {
                         last = new TourItem(
                             n,
                             parseFloat(el.find('gx:duration').getListText()),
+                            0,
+                            0,
                             l.find('longitude').getListText(),
                             l.find('latitude').getListText(),
                             l.find('altitude').getListText(),
@@ -142,6 +144,8 @@ export class KmlParser {
         if (p.has('name') && p.has('LookAt')) {
             const i = new TourItem(
                 p.find('name').getListText(),
+                0,
+                0,
                 0,
                 l.find('longitude').getListText(),
                 l.find('latitude').getListText(),

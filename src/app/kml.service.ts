@@ -15,15 +15,15 @@ export class KmlService {
   import() {
   }
 
-  export(items: TourItem[]) {
-    console.log('Exporting tour ...');
+  export(items: TourItem[], name: string) {
+    console.log('Exporting tour ...', items);
     const root = xmlbuilder.create('kml')
     .att('xmlns', 'http://www.opengis.net/kml/2.2')
     .att('xmlns:gx', 'http://www.google.com/kml/ext/2.2')
     .att('xmlns:kml', 'http://www.opengis.net/kml/2.2')
     .att('xmlns:atom', 'http://www.w3.org/2005/Atom')
       .ele('gx:Tour')
-        .ele('name', 'Unknown').up()
+        .ele('name', name).up()
         .ele('gx:Playlist');
 
     const start = items[0] && items[0].when;

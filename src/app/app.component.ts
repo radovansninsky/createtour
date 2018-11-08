@@ -3,6 +3,7 @@ import { Component, OnInit } from '@angular/core';
 import { TourItem } from './tour-item';
 import { KmlParser } from './kml-parser';
 import { KmlService } from './kml.service';
+import { isNullOrUndefined, isUndefined, isObject } from 'util';
 
 @Component({
   selector: 'app-root',
@@ -52,38 +53,49 @@ export class AppComponent implements OnInit {
       k.parse(t);
       console.log(k.items);
 
-      // todo zistit ci pridat alebo replacovat
-      this.clear();
       if (k.items.length > 0) {
-        this.name = k.name;
-        this.items.push(...k.items);
+        if  (isNullOrUndefined(this.name)) {
+          this.name = k.name;
+        }
+        k.items.forEach(ni => {
+          const oi = this.items.find(i => i.name === ni.name);
+          if (!isUndefined(oi)) {
+            oi.dur = ni.dur;
+            oi.lon = ni.lon;
+            oi.lat = ni.lat;
+            oi.alt = ni.alt;
+            oi.head = ni.head;
+            oi.tilt = ni.tilt;
+            oi.range = ni.range;
+            oi.when = ni.when;
+          } else {
+            this.items.push(ni);
+          }
+        });
 
-        let lastTime = this.items[0].when;
-        const speeds = [];
+
+        // nastavenie casu ak uplne chyba
+        let lastTime = this.start;
         this.items.forEach(ti => {
           ti.when = ti.when == null ? new Date(lastTime.getTime()) : ti.when;
-          ti.dur = ti.dur === 0 ? ((ti.when.getTime() - lastTime.getTime()) / 1000) / this.speed : ti.dur;
-          if (ti.dur > 0 && ti.dur !== NaN) {
-            speeds.push(((ti.when.getTime() - lastTime.getTime()) / 1000) / ti.dur);
-          }
           lastTime = ti.when;
         });
-        if (speeds.length > 0) {
-          this.speed = Math.round(Math.round(speeds.reduce((sum, v) => sum + v)) / speeds.length * 10) / 10;
-        }
+        this.recalc();
       }
     } catch (error) {
       console.error('Error occured while parsing clipboard text (probably not xml), detail:', error.message);
     }
   }
 
-  recalculate() {
+  recalc() {
+    this.items.sort((a, b) => a.when < b.when ? -1 : 1);
     let lastTime = this.start;
     const speeds = [];
     this.items.forEach(ti => {
-      ti.dur = ((ti.when.getTime() - lastTime.getTime()) / 1000) / this.speed;
-      if (ti.dur > 0 && ti.dur !== NaN) {
-        speeds.push(((ti.when.getTime() - lastTime.getTime()) / 1000) / ti.dur);
+      ti.realDur = ((ti.when.getTime() - lastTime.getTime()) / 1000);
+      ti.calcDur = ti.realDur / this.speed;
+      if (ti.calcDur > 0 && ti.calcDur !== NaN) {
+        speeds.push(((ti.when.getTime() - lastTime.getTime()) / 1000) / ti.calcDur);
       }
       lastTime = ti.when;
     });
@@ -93,7 +105,7 @@ export class AppComponent implements OnInit {
   }
 
   exportTour() {
-    this.kmlService.export(this.items);
+    this.kmlService.export(this.items, this.name);
   }
 
   clear() {
@@ -115,12 +127,7 @@ export class AppComponent implements OnInit {
       } else {
         item.when = new Date(d);
       }
-      // todo call recalculate
+      // this.recalc();
     }
-  }
-
-  calcSpeed(newDur: number, item: TourItem) {
-    item.dur = newDur;
-    // item.speed = item.lastItemDur / item.dur;
   }
 }
